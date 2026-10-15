@@ -11,4 +11,4 @@ View(observed_frequencies)
 
 # Built-in chi-squared assumes uniform distribution by default
 test_results <- chisq.test(observed_frequencies)
-print(test_results)
+print(test_results) 
