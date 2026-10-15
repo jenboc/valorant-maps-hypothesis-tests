@@ -1,6 +1,8 @@
 # Script for running the test for iid of VALORANT map selection
 # Run from the repo root
 
+library(ggplot2)
+
 # Read the chronological data and extract the unique map names
 map_chronology <- read.csv("./data/maps.csv", header = FALSE, col.names = "map_name")
 observation <- map_chronology$map_name
@@ -36,13 +38,41 @@ simulated_stats <- replicate(B, {
 View(simulated_stats)
 
 # Visualise the simulation statistics
-hist(
-    simulated_stats,
-    breaks = 40,
-    main = "Null Distribution under Uniform-IID assumption",
-    xlab = "Chi-squared 1-lag transition statistic"
+plot_data <- data.frame(statistic = simulated_stats)
+
+plot <- ggplot(plot_data, aes(x = statistic)) +
+    geom_histogram(
+        bins = 40,
+        fill = "steelblue",
+        colour = "white"
+    ) +
+    geom_vline(
+        aes(
+            xintercept = observed_stat,
+            colour = "Observed statistic"
+        ),
+        linewidth = 1
+    ) +
+    scale_colour_manual(
+        name = NULL,
+        values = c("Observed statistic" = "red")
+    ) +
+    labs(
+        title = "Null Distribution under Uniform IID Selection",
+        x = "Chi-squared transition statistic",
+        y = "Frequency"
+    ) +
+    theme_minimal(base_size = 14)
+
+print(plot)
+ggsave(
+    "uniform-iid-histogram.png",
+    plot = plot,
+    width = 10,
+    height = 6,
+    units = "in",
+    dpi = 150
 )
-abline(v = observed_stat, col = "red", lwd = 2)
 
 # Calculate the p-value
 p_value <- (1 + sum(simulated_stats >= observed_stat)) / (B + 1)
